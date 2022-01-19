@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/LMenten-Libraries.iml" filepath="$PROJECT_DIR$/LMenten-Libraries.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Libraries/lib-libreoffice/lib-libreoffice.iml" filepath="$PROJECT_DIR$/../Libraries/lib-libreoffice/lib-libreoffice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten/lib-lmenten.iml" filepath="$PROJECT_DIR$/lib-lmenten/lib-lmenten.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-awt/lib-lmenten-awt.iml" filepath="$PROJECT_DIR$/lib-lmenten-awt/lib-lmenten-awt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-fx/lib-lmenten-fx.iml" filepath="$PROJECT_DIR$/lib-lmenten-fx/lib-lmenten-fx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-libreoffice/lib-lmenten-libreoffice.iml" filepath="$PROJECT_DIR$/lib-lmenten-libreoffice/lib-lmenten-libreoffice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-swing/lib-lmenten-swing.iml" filepath="$PROJECT_DIR$/lib-lmenten-swing/lib-lmenten-swing.iml" />
+    </modules>
+  </component>
+</project>
