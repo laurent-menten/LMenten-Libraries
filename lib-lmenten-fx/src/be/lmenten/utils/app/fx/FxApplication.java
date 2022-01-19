@@ -2,7 +2,6 @@ package be.lmenten.utils.app.fx;
 
 import be.lmenten.utils.logging.AnsiLogFormatter;
 import be.lmenten.utils.logging.LogFormatter;
-import be.lmenten.utils.logging.LogLevel;
 import be.lmenten.utils.logging.LogRegExPackageFilter;
 import be.lmenten.utils.logging.fx.LogWindow;
 import javafx.application.Application;
@@ -20,10 +19,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import java.lang.Runtime.Version;
 
 /**
@@ -31,6 +30,16 @@ import java.lang.Runtime.Version;
  * <ul>
  *     <li>Debug</li>
  *     <li>Logging</li>
+ * </ul>
+ * <ul>
+ *     <li>be.lmenten.debug</li>
+ *     <li>be.lmenten.logLevel</li>
+ *     <li>be.lmenten.logFilter</li>
+ *     <li>be.lmenten.logDir</li>
+ *     <li>be.lmenten.logFileEnabled</li>
+ *     <li>be.lmenten.keepLogFile</li>
+ *     <li>be.lmenten.ansiLogOutput</li>
+ *     <li>be.lmenten.showLogWindow</li>
  * </ul>
  *
  * @author <a href="mailto:laurent.menten@gmail.com">Laurent Menten<a>
@@ -41,50 +50,14 @@ public abstract class FxApplication
 	extends Application
 	implements FxApplicationConstants
 {
-	// ------------------------------------------------------------------------
-	// - Runtime constants with defaults --------------------------------------
-	// ------------------------------------------------------------------------
+	private final FxApplicationSettings settings
+		= new FxApplicationSettings( this );
 
-	/*package*/ boolean debugMode
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_DEBUG, "false" ) );
-
-	/*package*/ boolean logAnsiOutput
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_LOG_ANSI_OUTPUT, "false" ) );
-
-	/*package*/ LogLevel logLevel
-		= LogLevel.parse( System.getProperty( PROPERTY_LOG_LEVEL, "OFF" ) );
-
-	/*package*/ boolean disableLogFilter
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_DISABLE_LOG_FILTER, "false" ) );
-
-	/*package*/ String logFilter
-			= System.getProperty( PROPERTY_LOG_FILTER,"be.lmenten.*" );
-
-	/*package*/ boolean disableLogfile
-			= Boolean.parseBoolean( System.getProperty( PROPERTY_LOG_DISABLE_LOGFILE, "false" ) );
-
-	/*package*/ boolean keepLogfile
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_LOG_KEEP_LOGFILE, "false" ) );
-
-	/*package*/ boolean showLogWindow
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_DEBUG_SHOW_LOG_WINDOW, "false" ) );
-
-	/*package*/ boolean showExceptionWindow
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_DEBUG_SHOW_EXCEPTION_WINDOW, "false" ) );
-
-	public final boolean runningFromExe
-		= Boolean.parseBoolean( System.getProperty( PROPERTY_LAUNCH4J_FLAG, "false" ) );
+	private final boolean runningFromJar;
 
 	// ------------------------------------------------------------------------
-	// - Runtime variables ----------------------------------------------------
-	// ------------------------------------------------------------------------
-
-	private final FxApplicationSettings settings;
-
-	private final Preferences APP_PREFS;
 
 	private boolean logFileOK;
-	private String logDirname;
 	private String logFilename = null;
 
 	protected Stage stage;
@@ -95,19 +68,17 @@ public abstract class FxApplication
 
 	protected FxApplication()
 	{
-		settings = new FxApplicationSettings( this );
-
 		// --------------------------------------------------------------------
 		// - Custom log output formatter --------------------------------------
 		// --------------------------------------------------------------------
 
-		if( logAnsiOutput )
+		if( settings.isAnsiLogOutputEnabled() )
 		{
-			AnsiLogFormatter.install( logLevel );
+			AnsiLogFormatter.install( settings.getLogLevel() );
 		}
 		else
 		{
-			LogFormatter.install( logLevel );
+			LogFormatter.install( settings.getLogLevel() );
 		}
 
 		LOG.fine( "Starting application " + getClass().getSimpleName() );
@@ -115,12 +86,13 @@ public abstract class FxApplication
 		LOG.finer( "Console log formatter installed." );
 
 		// --------------------------------------------------------------------
-		// - Preferences ------------------------------------------------------
+		// - Are we running from JAR file -------------------------------------
 		// --------------------------------------------------------------------
 
-		APP_PREFS = Preferences.userRoot().node( getClass().getName() );
+		String protocol =
+			Objects.requireNonNull( getClass().getResource("") ).getProtocol();
 
-		logDirname = APP_PREFS.get( PREFS_LOGGING_DIRECTORY, "./logs" );
+		runningFromJar = "jar".equalsIgnoreCase( protocol );
 	}
 
 	// ========================================================================
@@ -131,6 +103,11 @@ public abstract class FxApplication
 	public abstract Version getAppVersion();
 	public abstract long getBuildNumber();
 	public abstract LocalDateTime getBuildDateTime();
+
+	public final boolean isRunningFromJar()
+	{
+		return runningFromJar;
+	}
 
 	public FxApplicationSettings getSettings()
 	{
@@ -144,7 +121,7 @@ public abstract class FxApplication
 	/**
 	 * Call this first in application init() method.
 	 *
-	 * @throws Exception
+	 * @throws Exception if something goes wrong
 	 */
 	@Override
 	public void init()
@@ -158,12 +135,12 @@ public abstract class FxApplication
 
 		logFileOK = false;
 
-		if( ! disableLogfile )
+		if( settings.isLogFileEnabled() )
 		{
-			File logDir = new File( logDirname );
+			File logDir = new File( settings.getLogDir() );
 			if( ! logDir.exists() )
 			{
-				LOG.finer( "Log folder \"" + logDirname + "\" does not exists." );
+				LOG.finer( "Log folder \"" + settings.getLogDir() + "\" does not exists." );
 
 				if( ! logDir.mkdirs() )
 				{
@@ -185,9 +162,10 @@ public abstract class FxApplication
 					= logDir + File.separator + getClass().getSimpleName();
 
 				logFilename = LogFormatter.logToFile( logFileNamePrefix );
-				if( logFileOK = (logFilename == null) )
+				logFileOK = logFilename != null;
+				if( ! logFileOK )
 				{
-					LOG.warning("Could not instal log file handle.");
+					LOG.warning("Could not install log file handle.");
 				}
 			}
 			else
@@ -200,12 +178,9 @@ public abstract class FxApplication
 		// - Filter out foreign packages from logs ----------------------------
 		// --------------------------------------------------------------------
 
-		if( ! disableLogFilter )
-		{
-			LOG.finer( "Installing log source filter" );
+		LOG.finer( "Installing log source filter" );
 
-			LogRegExPackageFilter.install( logFilter, logLevel );
-		}
+		LogRegExPackageFilter.install( settings.getLogFilter(), settings.getLogLevel() );
 	}
 
 	// ========================================================================
@@ -215,8 +190,8 @@ public abstract class FxApplication
 	/**
 	 * Call this first in application start(stage) method.
 	 *
-	 * @param stage
-	 * @throws Exception
+	 * @param stage the application stage
+	 * @throws Exception if something goes wrong
 	 */
 	@Override
 	public void start( Stage stage )
@@ -227,10 +202,10 @@ public abstract class FxApplication
 		this.stage = stage;
 
 		// --------------------------------------------------------------------
-		// - First open log window i needed ----------------------------------
+		// - First open log window if needed ----------------------------------
 		// --------------------------------------------------------------------
 
-		if( debugMode || showLogWindow )
+		if( settings.isDebugModeEnabled() || settings.isShowLogWindowEnabled() )
 		{
 			LogWindow.display();
 		}
@@ -240,10 +215,7 @@ public abstract class FxApplication
 		// --------------------------------------------------------------------
 		// --------------------------------------------------------------------
 
-		stage.setOnCloseRequest( ev ->
-		{
-			this.closeRequest( ev );
-		} );
+		stage.setOnCloseRequest( this::closeRequest );
 	}
 
 	// ========================================================================
@@ -253,7 +225,7 @@ public abstract class FxApplication
 	/**
 	 * Call this last in application stop() method.
 	 *
-	 * @throws Exception
+	 * @throws Exception if something goes wrong
 	 */
 	@Override
 	public void stop()
@@ -265,11 +237,11 @@ public abstract class FxApplication
 		// - If not in debug mode remove log file ---------------------
 		// ------------------------------------------------------------
 
-		if( ! disableLogfile )
+		if( settings.isLogFileEnabled() )
 		{
 			if( logFileOK )
 			{
-				if( !debugMode && !keepLogfile )
+				if( !settings.isDebugModeEnabled() && !settings.isKeepLogFileEnabled() )
 				{
 					LOG.finer("Deleting log file \"" + logFilename + "\"");
 
@@ -306,7 +278,7 @@ public abstract class FxApplication
 
 	/**
 	 *
-	 * @param ev
+	 * @param ev triggering event
 	 */
 	protected void closeRequest( WindowEvent ev )
 	{
@@ -321,11 +293,11 @@ public abstract class FxApplication
 		alert.initModality( Modality.APPLICATION_MODAL );
 
 		alert.setTitle( getAppTitle() );
-		alert.setHeaderText( RES.getString( "alert.quit.header" ) );
-		alert.setContentText( RES.getString( "alert.quit.content.nosave" ) );
+		alert.setHeaderText( RESOURCE.getString( "alert.quit.header" ) );
+		alert.setContentText( RESOURCE.getString( "alert.quit.content.nosave" ) );
 
-		ButtonType yesButton = new ButtonType( RES.getString("yes"), ButtonBar.ButtonData.YES );
-		ButtonType cancelButton = new ButtonType( RES.getString("cancel"), ButtonBar.ButtonData.CANCEL_CLOSE );
+		ButtonType yesButton = new ButtonType( RESOURCE.getString("yes"), ButtonBar.ButtonData.YES );
+		ButtonType cancelButton = new ButtonType( RESOURCE.getString("cancel"), ButtonBar.ButtonData.CANCEL_CLOSE );
 		alert.getButtonTypes().setAll( yesButton, cancelButton );
 
 		DialogPane pane = alert.getDialogPane();
@@ -358,6 +330,7 @@ public abstract class FxApplication
 			else if( r.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE )
 			{
 				// no operation
+				LOG.fine( "Canceled close request." );
 			}
 		} );
 	}
@@ -365,18 +338,6 @@ public abstract class FxApplication
 	// ========================================================================
 	// = Misc. ================================================================
 	// ========================================================================
-
-	/**
-	 *
-	 * @return
-	 */
-	private boolean isRunningFromJar()
-	{
-		Class<?> clazz = getClass();
-		String clazzName = clazz.getSimpleName() + ".class";
-
-		return clazz.getResource( clazzName ).toString().startsWith( "jar:" );
-	}
 
 	/**
 	 *
@@ -388,65 +349,63 @@ public abstract class FxApplication
 		// --------------------------------------------------------------------
 
 		LOG.config( "Operating system: "
-				+ System.getProperty( "os.name" )
-				+ " (" + System.getProperty( "os.version" ) + ") "
-				+ System.getProperty( "os.arch" )
+			+ System.getProperty( "os.name" )
+			+ " (" + System.getProperty( "os.version" ) + ") "
+			+ System.getProperty( "os.arch" )
 		);
 
 		LOG.config( "Java VM: "
-				+ System.getProperty( "java.vm.name" )
-				+ " (" + System.getProperty( "java.vm.version" ) + ") "
-				+ System.getProperty( "java.vm.info" )
+			+ System.getProperty( "java.vm.name" )
+			+ " (" + System.getProperty( "java.vm.version" ) + ") "
+			+ System.getProperty( "java.vm.info" )
 		);
 
 		LOG.config( "Java runtime: "
-				+ System.getProperty( "java.runtime.name" )
-				+ " (" + System.getProperty( "java.runtime.version" ) + ")"
-
+			+ System.getProperty( "java.runtime.name" )
+			+ " (" + System.getProperty( "java.runtime.version" ) + ")"
 		);
 
 		LOG.config( "JavaFX runtime: "
-				+ System.getProperty( "javafx.version" )
-				+ " (" + System.getProperty( "javafx.runtime.version" ) + ")"
+			+ System.getProperty( "javafx.version" )
+			+ " (" + System.getProperty( "javafx.runtime.version" ) + ")"
 		);
 
 		// --------------------------------------------------------------------
 
 		LOG.config("App version: "
-				+ getAppVersion().toString()
-				+ " (build " + getBuildNumber() + ", " + getBuildDateTime() + ")"
+			+ getAppVersion().toString()
+			+ " (build " + getBuildNumber() + ", " + getBuildDateTime() + ")"
+		);
+
+		LOG.config( "Running from JAR: "
+			+ (isRunningFromJar() ? "Yes" : "No" )
 		);
 
 		// --------------------------------------------------------------------
 
-		LOG.config( "Debug mode: " + debugMode );
+		LOG.config( "Debug mode: " + settings.isDebugModeEnabled() );
 
 		LOG.config( "Log output style: "
-				+ (logAnsiOutput ? "Ansi" : "Normal")
+			+ (settings.isAnsiLogOutputEnabled() ? "Ansi" : "Normal")
 		);
 
-		LOG.config( "Log level: " + logLevel );
-		LOG.config( "Log filter: " + (disableLogFilter ? "DISABLED" : logFilter) );
-		LOG.config( "Log file: " + (disableLogfile ? "DISABLED" : logFilename) );
-		if( ! disableLogfile )
+		LOG.config( "Log level: " + settings.getLogLevel() );
+		LOG.config( "Log filter: " + settings.getLogFilter() );
+		LOG.config( "Log file: " + (settings.isLogFileEnabled() ? logFilename : "DISABLED" ) );
+		if( settings.isLogFileEnabled() )
 		{
-			LOG.config( "Keep logfile: " + (keepLogfile|debugMode)
-				+ ((!keepLogfile&debugMode)? " (FORCED by debug mode)" : "") );
+			LOG.config( "Keep logfile: " + (settings.isKeepLogFileEnabled()|settings.isDebugModeEnabled())
+				+ ((!settings.isKeepLogFileEnabled()&settings.isDebugModeEnabled())? " (FORCED by debug mode)" : "") );
 		}
 
-		LOG.config( "Show log window: " + (showLogWindow|debugMode)
-			+ ((!showLogWindow&debugMode)? " (FORCED by debug mode)" : "") );
+		LOG.config( "Show log window: " + (settings.isShowLogWindowEnabled()|settings.isDebugModeEnabled())
+			+ ((!settings.isShowLogWindowEnabled()&settings.isDebugModeEnabled())? " (FORCED by debug mode)" : "") );
 
-		LOG.config( "Show exception window: " + showExceptionWindow );
+		LOG.config( "Show exception window: " + settings.isShowExceptionWindowEnabled() );
 
 		// --------------------------------------------------------------------
 
-		LOG.config( "Running from jar: " + isRunningFromJar()
-				+ (runningFromExe ? " [Launch4J]" : "")
-		);
-
-		LOG.config( "Locale: " + Locale.getDefault()
-		);
+		LOG.config( "Locale: " + Locale.getDefault() );
 	}
 
 	// ========================================================================
@@ -456,19 +415,17 @@ public abstract class FxApplication
 	private static final Logger LOG
 		= Logger.getLogger( FxApplication.class.getName() );
 
-	@SuppressWarnings( "unused" )
-	private static final Preferences FXAPP_PREFS
-		= Preferences.userNodeForPackage( FxApplication.class );
-
 	// ------------------------------------------------------------------------
 
-	/*package*/ static final String RES_FQN = "be.lmenten.utils.app.fx.FxApplication";
+	/*package*/ static final String RESOURCE_FQN
+		= "be.lmenten.utils.app.fx.FxApplication";
 
-	/*package*/ static final ResourceBundle RES
-		= ResourceBundle.getBundle( RES_FQN );
+	/*package*/ static final ResourceBundle RESOURCE
+		= ResourceBundle.getBundle( RESOURCE_FQN );
 
-	private String $( @PropertyKey( resourceBundle=RES_FQN ) String key )
+	@SuppressWarnings( "unused" )
+	private String $( @PropertyKey( resourceBundle = RESOURCE_FQN ) String key )
 	{
-		return FxApplication.RES.getString( key );
+		return FxApplication.RESOURCE.getString( key );
 	}
 }
