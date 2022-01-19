@@ -7,6 +7,7 @@ import be.lmenten.utils.logging.fx.LogWindow;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.PropertyKey;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.Runtime.Version;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,7 +25,6 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.Runtime.Version;
 
 /**
  * An abstract JavaFx application base class with various capabilities like:
@@ -101,8 +102,14 @@ public abstract class FxApplication
 
 	public abstract String getAppTitle();
 	public abstract Version getAppVersion();
+	public abstract Image getAppIcon();
+
 	public abstract long getBuildNumber();
 	public abstract LocalDateTime getBuildDateTime();
+
+	// ------------------------------------------------------------------------
+	// - Miscellaneous --------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	public final boolean isRunningFromJar()
 	{
@@ -112,6 +119,37 @@ public abstract class FxApplication
 	public FxApplicationSettings getSettings()
 	{
 		return settings;
+	}
+
+	// ------------------------------------------------------------------------
+	// - Application close support --------------------------------------------
+	// ------------------------------------------------------------------------
+
+	/**
+	 * <p>
+	 * Ask application about the status of current project. This method is
+	 * used upon close request to offer an opportunity to save the project.
+	 * <p>
+	 * By default no project so no need to save.
+	 *
+	 * @return true if current project is dirty
+	 */
+	public boolean isCurrentProjectDirty()
+	{
+		return false;
+	}
+
+	/**
+	 * <p>
+	 * Try to save the project.
+	 * <p>
+	 * Successful by default.
+	 *
+	 * @return save was successful
+	 */
+	public boolean saveCurrentProject()
+	{
+		return true;
 	}
 
 	// ========================================================================
@@ -210,7 +248,7 @@ public abstract class FxApplication
 			LogWindow.display();
 		}
 
-		logRuntimeInfos();
+		logRuntimeInformation();
 
 		// --------------------------------------------------------------------
 		// --------------------------------------------------------------------
@@ -293,12 +331,26 @@ public abstract class FxApplication
 		alert.initModality( Modality.APPLICATION_MODAL );
 
 		alert.setTitle( getAppTitle() );
-		alert.setHeaderText( RESOURCE.getString( "alert.quit.header" ) );
-		alert.setContentText( RESOURCE.getString( "alert.quit.content.nosave" ) );
 
-		ButtonType yesButton = new ButtonType( RESOURCE.getString("yes"), ButtonBar.ButtonData.YES );
-		ButtonType cancelButton = new ButtonType( RESOURCE.getString("cancel"), ButtonBar.ButtonData.CANCEL_CLOSE );
-		alert.getButtonTypes().setAll( yesButton, cancelButton );
+		if( isCurrentProjectDirty() )
+		{
+			alert.setHeaderText( $( "alert.quit.header.save" ) );
+			alert.setContentText( $( "alert.quit.content.save" ) );
+
+			ButtonType yesButton = new ButtonType( $("yes"), ButtonBar.ButtonData.YES );
+			ButtonType noButton  = new ButtonType( $("save"), ButtonBar.ButtonData.NO );
+			ButtonType cancelButton = new ButtonType( $("cancel"), ButtonBar.ButtonData.CANCEL_CLOSE );
+			alert.getButtonTypes().setAll( yesButton, noButton, cancelButton );
+		}
+		else
+		{
+			alert.setHeaderText( $( "alert.quit.header.nosave" ) );
+			alert.setContentText( $( "alert.quit.content.nosave" ) );
+
+			ButtonType yesButton = new ButtonType( $("yes"), ButtonBar.ButtonData.YES );
+			ButtonType cancelButton = new ButtonType( $("cancel"), ButtonBar.ButtonData.CANCEL_CLOSE );
+			alert.getButtonTypes().setAll( yesButton, cancelButton );
+		}
 
 		DialogPane pane = alert.getDialogPane();
 
@@ -315,12 +367,24 @@ public abstract class FxApplication
 		alert.showAndWait().ifPresent( r ->
 		{
 			// ----------------------------------------------------------------
-			// - Exit ---------------------------------------------------------
+			// - Exit without saving ------------------------------------------
 			// ----------------------------------------------------------------
 
 			if( r.getButtonData() == ButtonBar.ButtonData.YES )
 			{
 				Platform.exit();
+			}
+
+			// ----------------------------------------------------------------
+			// - Exit with saving ---------------------------------------------
+			// ----------------------------------------------------------------
+
+			else if( r.getButtonData() == ButtonBar.ButtonData.NO )
+			{
+				if( saveCurrentProject() )
+				{
+					Platform.exit();
+				}
 			}
 
 			// ----------------------------------------------------------------
@@ -342,7 +406,7 @@ public abstract class FxApplication
 	/**
 	 *
 	 */
-	private void logRuntimeInfos()
+	private void logRuntimeInformation()
 	{
 		// --------------------------------------------------------------------
 		// - Diagnostic -------------------------------------------------------
@@ -383,7 +447,7 @@ public abstract class FxApplication
 
 		// --------------------------------------------------------------------
 
-		LOG.config( "Debug mode: " + settings.isDebugModeEnabled() );
+		LOG.config( "Debug mode: " + (settings.isDebugModeEnabled() ? "ENABLED" : "DISABLED") );
 
 		LOG.config( "Log output style: "
 			+ (settings.isAnsiLogOutputEnabled() ? "Ansi" : "Normal")

@@ -268,6 +268,8 @@ public class FxApplicationSettings
 
 	private final FxApplication app;
 
+	private final Preferences prefs;
+
 	/**
 	 *
 	 * @param app the application
@@ -275,6 +277,8 @@ public class FxApplicationSettings
 	/*package*/ FxApplicationSettings( FxApplication app )
 	{
 		this.app = app;
+
+		prefs = Preferences.userNodeForPackage( app.getClass() );
 
 		// --------------------------------------------------------------------
 		// - Load the preferences and override the values with those from
@@ -312,8 +316,6 @@ public class FxApplicationSettings
 	 */
 	private void loadFromPreferences()
 	{
-		Preferences prefs = Preferences.userNodeForPackage( app.getClass() );
-
 		setDebugModeEnabled( prefs.getBoolean( PROPERTY_DEBUG_MODE_ENABLED, DEBUG_MODE_ENABLED_DEFAULT ) );
 
 		setLogLevel( LogLevel.parse( prefs.get( PROPERTY_LOG_LEVEL, LOG_LEVEL_DEFAULT.name() ) ) );
@@ -336,8 +338,6 @@ public class FxApplicationSettings
 	 */
 	public void saveToPreferences()
 	{
-		Preferences prefs = Preferences.userNodeForPackage( app.getClass() );
-
 		try
 		{
 			prefs.putBoolean( PROPERTY_DEBUG_MODE_ENABLED, isDebugModeEnabled() );
@@ -376,11 +376,7 @@ public class FxApplicationSettings
 			debugModeEnabled.set( Boolean.parseBoolean( s ) );
 		}
 
-		s = System.getProperty( PROPERTY_ANSI_LOG_OUTPUT_ENABLED );
-		if( s != null )
-		{
-			ansiLogOutputEnabled.set( Boolean.parseBoolean( s ) );
-		}
+		// --------------------------------------------------------------------
 
 		s = System.getProperty( PROPERTY_LOG_LEVEL );
 		if( s != null )
@@ -394,10 +390,44 @@ public class FxApplicationSettings
 			logFilter.set( s );
 		}
 
+		// --------------------------------------------------------------------
+
+		s = System.getProperty( PROPERTY_LOG_DIR );
+		if( s != null )
+		{
+			logDir.set( s );
+		}
+
+		s = System.getProperty( PROPERTY_LOG_FILE_ENABLED );
+		if( s != null )
+		{
+			logFileEnabled.set( Boolean.parseBoolean( s ) );
+		}
+
+		s = System.getProperty( PROPERTY_KEEP_LOG_FILE_ENABLED );
+		if( s != null )
+		{
+			keepLogFileEnabled.set( Boolean.parseBoolean( s ) );
+		}
+
+		// --------------------------------------------------------------------
+
+		s = System.getProperty( PROPERTY_ANSI_LOG_OUTPUT_ENABLED );
+		if( s != null )
+		{
+			ansiLogOutputEnabled.set( Boolean.parseBoolean( s ) );
+		}
+
 		s = System.getProperty( PROPERTY_SHOW_LOG_WINDOW_ENABLED );
 		if( s != null )
 		{
 			showLogWindowEnabled.set( Boolean.parseBoolean( s ) );
+		}
+
+		s = System.getProperty( PROPERTY_SHOW_EXCEPTION_WINDOW_ENABLED );
+		if( s != null )
+		{
+			showExceptionWindowEnabled.set( Boolean.parseBoolean( s ) );
 		}
 	}
 
