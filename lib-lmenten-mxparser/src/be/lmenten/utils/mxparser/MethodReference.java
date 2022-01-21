@@ -26,7 +26,8 @@ public class MethodReference
 	private DoubleSupplier methodReference;
 	private String description;
 
-	private Argument relatedArgument;
+	protected Argument relatedArgument;
+	private boolean shouldInitArgument;
 
 	// ------------------------------------------------------------------------
 
@@ -42,7 +43,7 @@ public class MethodReference
 		this( referenceName, method, "" );
 	}
 
-	public MethodReference( String referenceName, DoubleSupplier method, String referenceDescription )
+	public MethodReference( String referenceName, DoubleSupplier method, String description )
 	{
 		super( MethodReference.TYPE_ID );
 
@@ -50,10 +51,10 @@ public class MethodReference
 		{
 			this.referenceName = referenceName;
 			this.methodReference = method;
-			this.description = referenceDescription;
+			this.description = description;
 
 			this.relatedArgument = new Argument( referenceName );
-			refreshValue();
+			this.shouldInitArgument = true;
 
 			syntaxStatus = NO_SYNTAX_ERRORS;
 			errorMessage = NO_SYNTAX_ERROR_MSG;
@@ -69,12 +70,12 @@ public class MethodReference
 	// = Getters/Setters ======================================================
 	// ========================================================================
 
-	public String getReferenceName()
+	public final String getReferenceName()
 	{
 		return referenceName;
 	}
 
-	public void setReferenceName( String referenceName )
+	public final void setReferenceName( String referenceName )
 	{
 		if( mXparser.regexMatch( referenceName, ParserSymbol.nameOnlyTokenOptBracketsRegExp ) )
 		{
@@ -90,19 +91,25 @@ public class MethodReference
 
 	// ------------------------------------------------------------------------
 
-	public Argument getRelatedArgument()
+	public final Argument getRelatedArgument()
 	{
+		if( shouldInitArgument == true )
+		{
+			shouldInitArgument = false;
+			refreshValue();
+		}
+
 		return relatedArgument;
+	}
+
+	public final double getValue()
+	{
+		return getRelatedArgument().getArgumentValue();
 	}
 
 	public void refreshValue()
 	{
 		relatedArgument.setArgumentValue( methodReference.getAsDouble() );
-	}
-
-	public double getValue()
-	{
-		return relatedArgument.getArgumentValue();
 	}
 
 	// ------------------------------------------------------------------------
