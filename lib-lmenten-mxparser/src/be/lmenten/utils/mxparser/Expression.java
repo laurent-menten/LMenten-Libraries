@@ -12,17 +12,20 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * <pre>
- * 		Expression e = new Expression( "a + value" );
  *
- * 		Constant a = new Constant( "a", 1 );
- * 		e.addConstants( a );
+	<pre>
+	Expression e = new Expression( "a + o1 + o2" );
+
+	Constant a = new Constant( "a", 1 );
+	e.addConstants( a );
+
+	MethodReference o1 = new MethodReference( "o1", this::getValue );
+	ObjectReference o2 = new ObjectReference<LocalDate>( "o2", LocalDate.now(), d -> (double) d.getDayOfMonth() );
+	e.addMethodReferences( o1, o2 );
+
+	o1.refreshValue();
+	</pre>
  *
- * 		MethodReference value = new MethodReference( "value", this::getValue );
- * 		e.addMethodReferences( value );
- *
- * 		e.refreshValue();
- * 	</pre>
  */
 public class Expression
 	extends org.mariuszgromada.math.mxparser.Expression
