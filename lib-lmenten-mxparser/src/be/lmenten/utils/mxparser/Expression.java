@@ -14,17 +14,30 @@ import java.util.logging.Logger;
 /**
  *
 	<pre>
-	Expression e = new Expression( "a + o1 + o2" );
+		 Constant v = new Constant( "v", 1 );
 
-	Constant a = new Constant( "a", 1 );
-	e.addConstants( a );
+		 MethodReference o1 = new MethodReference( "o1", this::getValue );
+		 ObjectReference o2 = new ObjectReference<LocalDate>( "o2", LocalDate.now(), d -> (double) d.getDayOfMonth() );
 
-	MethodReference o1 = new MethodReference( "o1", this::getValue );
-	ObjectReference o2 = new ObjectReference<LocalDate>( "o2", LocalDate.now(), d -> (double) d.getDayOfMonth() );
-	e.addMethodReferences( o1, o2 );
+		 Expression e1 = new Expression( "v + o1 + o2" );
+		 e1.addConstants( v );
+		 e1.addMethodReferences( o1, o2 );
 
-	o1.refreshValue();
+		 double r = e1.calculate();
 	</pre>
+ *
+	<pre>
+		 Constant v = new Constant( "v", 1 );
+
+		 Argument a1 = new Argument( "a1", new MethodReferenceArgument( this::getValue ) );
+		 Argument a2 = new Argument( "a2", new ObjectReferenceArgument<LocalDate>( LocalDate.now(), d -> (double) d.getDayOfMonth() ) );
+
+		 Expression e2 = new Expression( "v + a1 + a2" );
+		 e2.addConstants( v );
+		 e2.addArguments( a1, a2 );
+
+		 double s = e2.calculate();
+ 	</pre>
  *
  */
 public class Expression
