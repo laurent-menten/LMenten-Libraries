@@ -8,7 +8,9 @@
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-awt/lib-lmenten-awt.iml" filepath="$PROJECT_DIR$/lib-lmenten-awt/lib-lmenten-awt.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-fx/lib-lmenten-fx.iml" filepath="$PROJECT_DIR$/lib-lmenten-fx/lib-lmenten-fx.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-libreoffice/lib-lmenten-libreoffice.iml" filepath="$PROJECT_DIR$/lib-lmenten-libreoffice/lib-lmenten-libreoffice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-mxparser/lib-lmenten-mxparser.iml" filepath="$PROJECT_DIR$/lib-lmenten-mxparser/lib-lmenten-mxparser.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-swing/lib-lmenten-swing.iml" filepath="$PROJECT_DIR$/lib-lmenten-swing/lib-lmenten-swing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Libraries/mXparser/mXparser.iml" filepath="$PROJECT_DIR$/../Libraries/mXparser/mXparser.iml" />
     </modules>
   </component>
 </project>
