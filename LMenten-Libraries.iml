@@ -7,5 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="lib-lmenten-mxparser" />
+    <orderEntry type="module" module-name="lib-mXparser" />
+    <orderEntry type="module" module-name="lib-lmenten-math" />
+    <orderEntry type="module" module-name="lib-lmenten-enigma" />
   </component>
 </module>

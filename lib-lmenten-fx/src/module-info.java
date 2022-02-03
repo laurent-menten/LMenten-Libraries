@@ -3,16 +3,19 @@ module lib.lmenten.fx
     exports be.lmenten.utils.app.fx;
 	exports be.lmenten.utils.ui.fx;
 	exports be.lmenten.utils.logging.fx;
+	exports be.lmenten.utils.ui;
 
 	requires lib.lmenten;
 
 	requires org.jetbrains.annotations;
 
-    requires javafx.graphics;
-    requires java.logging;
-    requires java.prefs;
-    requires javafx.controls;
+	requires java.logging;
+	requires java.prefs;
 	requires jdk.jsobject;
-	requires javafx.web;
 	requires java.desktop;
+
+	requires javafx.graphics;
+    requires javafx.controls;
+	requires javafx.fxml;
+	requires javafx.web;
 }

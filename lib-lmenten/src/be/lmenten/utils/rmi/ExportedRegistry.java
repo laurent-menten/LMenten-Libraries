@@ -70,7 +70,7 @@ public class ExportedRegistry
      * <p>Once the registry is exported, the registry's <code>bind</code>
      * method is invoked with the specified name and proxy as arguments.
      *
-     * @param obj the proxy for a remote object
+     * @param proxy the proxy for a remote object
      * @param name the name for the remote object in the registry
      * @param port a port to export the registry on if there is no
      * inherited channel

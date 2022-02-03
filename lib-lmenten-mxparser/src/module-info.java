@@ -1,6 +1,8 @@
 module lib.lmenten.mxparser
 {
-	exports be.lmenten.utils.mxparser;
-	requires mXparser;
+	requires lib.mXparser;
 	requires java.logging;
+
+	exports be.lmenten.utils.mxparser;
+	exports be.lmenten.utils.mxparser.annotations;
 }

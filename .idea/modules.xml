@@ -6,10 +6,13 @@
       <module fileurl="file://$PROJECT_DIR$/../Libraries/lib-libreoffice/lib-libreoffice.iml" filepath="$PROJECT_DIR$/../Libraries/lib-libreoffice/lib-libreoffice.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten/lib-lmenten.iml" filepath="$PROJECT_DIR$/lib-lmenten/lib-lmenten.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-awt/lib-lmenten-awt.iml" filepath="$PROJECT_DIR$/lib-lmenten-awt/lib-lmenten-awt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-enigma/lib-lmenten-enigma.iml" filepath="$PROJECT_DIR$/lib-lmenten-enigma/lib-lmenten-enigma.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-fx/lib-lmenten-fx.iml" filepath="$PROJECT_DIR$/lib-lmenten-fx/lib-lmenten-fx.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-libreoffice/lib-lmenten-libreoffice.iml" filepath="$PROJECT_DIR$/lib-lmenten-libreoffice/lib-lmenten-libreoffice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-lmenten-math/lib-lmenten-math.iml" filepath="$PROJECT_DIR$/lib-lmenten-math/lib-lmenten-math.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-mxparser/lib-lmenten-mxparser.iml" filepath="$PROJECT_DIR$/lib-lmenten-mxparser/lib-lmenten-mxparser.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-lmenten-swing/lib-lmenten-swing.iml" filepath="$PROJECT_DIR$/lib-lmenten-swing/lib-lmenten-swing.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Libraries/lib-mXparser/lib-mXparser.iml" filepath="$PROJECT_DIR$/../Libraries/lib-mXparser/lib-mXparser.iml" />
       <module fileurl="file://$PROJECT_DIR$/../Libraries/mXparser/mXparser.iml" filepath="$PROJECT_DIR$/../Libraries/mXparser/mXparser.iml" />
     </modules>
   </component>
