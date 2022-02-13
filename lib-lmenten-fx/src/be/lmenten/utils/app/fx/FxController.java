@@ -2,8 +2,18 @@ package be.lmenten.utils.app.fx;
 
 import javafx.fxml.Initializable;
 
-public interface FxController<T>
-	extends Initializable
+public abstract class FxController<T extends FxApplication>
+	implements Initializable
 {
-	public void setApplication( T application );
+	private T application;
+
+	public void setApplication( T application )
+	{
+		this.application = application;
+	}
+
+	public T getApplication()
+	{
+		return application;
+	}
 }

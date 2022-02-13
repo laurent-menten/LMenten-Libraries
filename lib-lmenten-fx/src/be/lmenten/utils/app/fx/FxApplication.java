@@ -47,7 +47,7 @@ import java.util.logging.Logger;
  * @version 1.0
  * @since 1.0 - 2022 / 01 / 02
  */
-public abstract class FxApplication<T>
+public abstract class FxApplication
 	extends Application
 	implements FxApplicationConstants
 {

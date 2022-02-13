@@ -241,6 +241,19 @@ public class LogFormatter
 		return null;
 	}
 
+	public static void closeLogFiles()
+	{
+		Handler [] hanglers = Logger.getLogger( "" ).getHandlers();
+		for( Handler handler : hanglers )
+		{
+			if( handler instanceof FileHandler fileHandler
+					&& fileHandler.getFormatter() instanceof LogFormatter )
+			{
+				fileHandler.close();
+			}
+		}
+	}
+
 	// ========================================================================
 	// =
 	// ========================================================================
